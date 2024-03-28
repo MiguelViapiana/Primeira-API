@@ -1,6 +1,11 @@
-### Listagem de produtos
+### Raiz da aplicação
+GET http://localhost:5169/
 
+### Listagem de produtos
 GET http://localhost:5169/produtos/listar
+
+### Busca de produtos
+GET http://localhost:5169/produtos/buscar/Celula
 
 ### Cadastro de produtos
 POST http://localhost:5169/produtos/cadastrar
