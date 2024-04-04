@@ -5,7 +5,7 @@ GET http://localhost:5169/
 GET http://localhost:5169/produtos/listar
 
 ### Busca de produtos
-GET http://localhost:5169/produtos/buscar/Celula
+GET http://localhost:5169/produtos/buscar/Macarrão
 
 ### Cadastro de produtos
-POST http://localhost:5169/produtos/cadastrar
+POST http://localhost:5169/produtos/cadastrar/Macarrão/alimento/7.50

@@ -12,13 +12,13 @@ var app = builder.Build();
 // produto.setNome("Bolacha");
 // Console.WriteLine(produto.getNome());
 
-var produtos = new List<Produto>
-{
-    new Produto("Celular", "IOS", 45),
-    new Produto("Celular", "Android", 56.8),
+List<Produto> produtos =
+[
+    new Produto("Celular", "IOS", 345),
+    new Produto("Celular", "Android", 256.8),
     new Produto("Televisão", "LG", 240),
     new Produto("Placa de vídeo", "NVIDIA", 1200)
-};
+];
 
 
 //Funcionalidades da aplicação - EndPoints
@@ -45,7 +45,21 @@ app.MapGet("/produtos/buscar/{nome}", ([FromRoute]string nome) =>
 
 
 // GET: http://localhost:5169/produtos/cadastrar
-app.MapPost("/produtos/cadastrar", () => "Cadastro de produtos");
+app.MapPost("/produtos/cadastrar/{nome}/{descricao}/{valor}", ([FromRoute]string nome, [FromRoute]string descricao, [FromRoute]double valor) => 
+{
+    //Preencher o objeto pelo o construtor
+    Produto produto = new Produto(nome, descricao, valor);
+
+    //Preencher objeto pelos os atributos
+    produto.Nome = nome;
+    produto.Descricao = descricao;
+    produto.Valor = valor;
+
+    //Adicionar o objeto dentro da lista
+    produtos.Add(produto);
+    return Results.Created("", produto);
+
+});
 
 //Exercicio 
 //1)Cadastar um produto
