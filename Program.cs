@@ -1,6 +1,9 @@
 
 using API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
@@ -29,11 +32,11 @@ app.MapGet("/", () => "API de produtos");
 app.MapGet("/produtos/listar", () => produtos);
 
 // GET: http://localhost:5169/produtos/buscar/nomedoproduto
-app.MapGet("/produtos/buscar/{nome}", ([FromRoute]string nome) =>
+app.MapGet("/produtos/buscar/{nome}", ([FromRoute] string nome) =>
     {
         for (int i = 0; i < produtos.Count; i++)
         {
-            if(produtos[i].Nome == nome)
+            if (produtos[i].Nome == nome)
             {
                 //retronar o produto encontrado
                 return Results.Ok(produtos[i]);
@@ -44,22 +47,56 @@ app.MapGet("/produtos/buscar/{nome}", ([FromRoute]string nome) =>
 );
 
 
+//Pelo Body
 // GET: http://localhost:5169/produtos/cadastrar
-app.MapPost("/produtos/cadastrar/{nome}/{descricao}/{valor}", ([FromRoute]string nome, [FromRoute]string descricao, [FromRoute]double valor) => 
+app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto) =>
 {
-    //Preencher o objeto pelo o construtor
-    Produto produto = new Produto(nome, descricao, valor);
-
-    //Preencher objeto pelos os atributos
-    produto.Nome = nome;
-    produto.Descricao = descricao;
-    produto.Valor = valor;
-
     //Adicionar o objeto dentro da lista
     produtos.Add(produto);
     return Results.Created("", produto);
 
 });
+
+app.MapDelete("/produtos/deletar/{nome}", ([FromRoute] string nome) =>
+{
+    for (int i = 0; i < produtos.Count; i++)
+    {
+        if (produtos[i].Nome == nome)
+        {
+            produtos.RemoveAt(i);
+            return Results.Ok("Produto removido com suscesso");
+        }
+    }
+    return Results.NotFound("Produto não encontrado");
+});
+
+app.MapPatch("/produtos/alterar/{nome}/{preco}", ([FromRoute] string nome, [FromRoute]double preco) =>
+{
+    for (int i = 0; i < produtos.Count; i++)
+    {
+        if (produtos[i].Nome == nome)
+        {
+            produtos[i].Valor = preco;
+            return Results.Ok("Produto alterado  com sucesso");
+        }
+    }
+    return Results.NotFound("Produto não encontrado");
+});
+//Pela URL
+//app.MapPost("/produtos/cadastrar/{nome}/{descricao}/{valor}", ([FromRoute]////string nome, [FromRoute]string descricao, [FromRoute]double valor) => {
+//Preencher o objeto pelo o construtor
+//Produto produto = new Produto(nome, descricao, valor);
+
+//Preencher objeto pelos os atributos
+//produto.Nome = nome;
+//produto.Descricao = descricao;
+//produto.Valor = valor;
+//Adicionar o objeto dentro da lista
+//produtos.Add(produto);
+//return Results.Created("", produto);
+//});
+
+
 
 //Exercicio 
 //1)Cadastar um produto

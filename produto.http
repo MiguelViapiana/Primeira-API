@@ -8,4 +8,20 @@ GET http://localhost:5169/produtos/listar
 GET http://localhost:5169/produtos/buscar/Macarrão
 
 ### Cadastro de produtos
-POST http://localhost:5169/produtos/cadastrar/Macarrão/alimento/7.50
+POST http://localhost:5169/produtos/cadastrar
+Content-Type: application/json
+
+{
+    "nome" : "Batata",
+    "descricao": "Alimento",
+    "valor": 2.60
+}
+
+### Delete de produtos
+DELETE http://localhost:5169/produtos/deletar/Batata
+
+### Atualizar um produto
+
+PATCH http://localhost:5169/produtos/alterar/Batata/3.5
+
+
