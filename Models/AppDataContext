@@ -1,4 +1,4 @@
-namespace API.PrimeriaAPI.Models;
+namespace PrimeriaAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 //Classes que representa Entity Framework Core : Code First
