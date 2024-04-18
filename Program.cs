@@ -1,9 +1,12 @@
 
 using API.Models;
+using API.PrimeriaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
+//Registrar o sereviço de banco de dados
+builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 
 
@@ -26,8 +29,16 @@ List<Produto> produtos =
 // GET: http://localhost:5169/
 app.MapGet("/", () => "API de produtos");
 
+
 // GET: http://localhost:5169/produtos/listar
-app.MapGet("/produtos/listar", () => produtos);
+app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) => 
+{
+    if(ctx.TabelaProdutos.Any()){
+        return Results.Ok(ctx.TabelaProdutos.ToList());
+    }
+    return Results.NotFound("Não existe produtos na tabela");
+});
+
 
 // GET: http://localhost:5169/produtos/buscar/nomedoproduto
 app.MapGet("/produtos/buscar/{nome}", ([FromRoute] string nome) =>
@@ -47,10 +58,12 @@ app.MapGet("/produtos/buscar/{nome}", ([FromRoute] string nome) =>
 
 //Pelo Body
 // GET: http://localhost:5169/produtos/cadastrar
-app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto) =>
+app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto,
+[FromServices] AppDataContext ctx) =>
 {
-    //Adicionar o objeto dentro da lista
-    produtos.Add(produto);
+    //Adicionar o objeto dentro da tabela no bando de dados
+    ctx.TabelaProdutos.Add(produto);
+    ctx.SaveChanges(); //Aletrar ou remover, precisa do SaveChanges()
     return Results.Created("", produto);
 
 });
