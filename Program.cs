@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using API.Models;
 using API.PrimeriaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 
-List<Produto> produtos =
-[
-    new Produto("Celular", "IOS", 345),
-    new Produto("Celular", "Android", 256.8),
-    new Produto("Televisão", "LG", 240),
-    new Produto("Placa de vídeo", "NVIDIA", 1200)
-];
-
 
 //Funcionalidades da aplicação - EndPoints
 // GET: http://localhost:5169/
@@ -25,9 +18,10 @@ app.MapGet("/", () => "API de produtos");
 
 
 // GET: http://localhost:5169/produtos/listar
-app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) => 
+app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) =>
 {
-    if(ctx.TabelaProdutos.Any()){
+    if (ctx.TabelaProdutos.Any())
+    {
         return Results.Ok(ctx.TabelaProdutos.ToList());
     }
     return Results.NotFound("Não existe produtos na tabela");
@@ -35,11 +29,12 @@ app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) =>
 
 
 // GET: http://localhost:5169/produtos/buscar/iddoproduto
-app.MapGet("/produtos/buscar/{id}", ([FromRoute] string id, 
+app.MapGet("/produtos/buscar/{id}", ([FromRoute] string id,
 [FromServices] AppDataContext ctx) =>
     {
         Produto? produto = ctx.TabelaProdutos.Find(id);
-        if(produto == null){
+        if (produto == null)
+        {
             return Results.NotFound("Produto não encontrado");
         }
         return Results.Ok(produto);
@@ -51,11 +46,26 @@ app.MapGet("/produtos/buscar/{id}", ([FromRoute] string id,
 // GET: http://localhost:5169/produtos/cadastrar
 app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto,
 [FromServices] AppDataContext ctx) =>
+
 {
-    //Adicionar o objeto dentro da tabela no bando de dados
-    ctx.TabelaProdutos.Add(produto);
-    ctx.SaveChanges(); //Aletrar ou remover, precisa do SaveChanges()
-    return Results.Created("", produto);
+
+    List<ValidationResult> erros = new List<ValidationResult>();
+    if (!Validator.TryValidateObject(produto, new ValidationContext(produto), erros, true))
+    {
+        return Results.BadRequest(erros);
+    }
+
+
+    Produto? produtoBuscado = ctx.TabelaProdutos.FirstOrDefault(x => x.Nome == produto.Nome);
+    if (produtoBuscado is null)
+    {
+        //Adicionar o objeto dentro da tabela no bando de dados
+        ctx.TabelaProdutos.Add(produto);
+        ctx.SaveChanges(); //Aletrar ou remover, precisa do SaveChanges()
+        return Results.Created("", produto);
+    }
+    return Results.BadRequest("Já existe um produto com o mesmo nome");
+
 
 });
 
@@ -63,10 +73,10 @@ app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto,
 app.MapDelete("/produtos/deletar/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
 {
     Produto? produto = ctx.TabelaProdutos.FirstOrDefault(x => x.Id == id);
-    
+
     if (produto is null)
     {
-        
+
         return Results.NotFound("Produto não encontrado");
     }
     ctx.TabelaProdutos.Remove(produto);
@@ -75,14 +85,15 @@ app.MapDelete("/produtos/deletar/{id}", ([FromRoute] string id, [FromServices] A
 });
 
 // PATCH http://localhost:5169/produtos/alterar/id
-app.MapPatch("/produtos/alterar/{id}", ([FromRoute] string id, [FromBody] Produto novoProduto, 
+app.MapPatch("/produtos/alterar/{id}", ([FromRoute] string id, [FromBody] Produto novoProduto,
 [FromServices] AppDataContext ctx) =>
 {
     var produto = ctx.TabelaProdutos.Find(id);
-        if( produto is null){
-            return Results.NotFound("Produto não encontrado");
-            
-        }
+    if (produto is null)
+    {
+        return Results.NotFound("Produto não encontrado");
+
+    }
     produto.Nome = novoProduto.Nome;
     produto.Descricao = novoProduto.Descricao;
     produto.Valor = novoProduto.Valor;

@@ -22,9 +22,9 @@ POST http://localhost:5169/produtos/cadastrar
 Content-Type: application/json
 
 {
-    "nome" : "Arroz",
-    "descricao": "Alimento",
-    "valor": 10.50
+    "nome" : "",
+    "descricao": "Al",
+    "valor": 1001
 }
 
 ### Delete de produtos
@@ -32,7 +32,7 @@ DELETE http://localhost:5169/produtos/deletar/eca62f2c-ffc6-4537-ab0a-1fcc463c43
 
 ### Atualizar um produto
 
-PATCH http://localhost:5169/produtos/alterar/aaa65df4-168d-44ff-a831-520318713f5c
+PATCH http://localhost:5169/produtos/alterar/0a32ea2b-e269-42c2-bb93-9aa2e4c2f726
 Content-Type: application/json
 
 {
