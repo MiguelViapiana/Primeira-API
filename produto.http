@@ -5,7 +5,7 @@ GET http://localhost:5169/
 GET http://localhost:5169/produtos/listar
 
 ### Busca de produtos
-GET http://localhost:5169/produtos/buscar/Arroz
+GET http://localhost:5169/produtos/buscar/c07b741c-add8-47c2-9ad9-f49ff0ae293a
 
 ### Cadastro de produtos
 POST http://localhost:5169/produtos/cadastrar
@@ -28,11 +28,11 @@ Content-Type: application/json
 }
 
 ### Delete de produtos
-DELETE http://localhost:5169/produtos/deletar/Batata
+DELETE http://localhost:5169/produtos/deletar/eca62f2c-ffc6-4537-ab0a-1fcc463c433d
 
 ### Atualizar um produto
 
-PATCH http://localhost:5169/produtos/alterar/Batata/
+PATCH http://localhost:5169/produtos/alterar/aaa65df4-168d-44ff-a831-520318713f5c
 Content-Type: application/json
 
 {

@@ -10,13 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 
-
-//Produto produto = new Produto();
-//produto.Nome = "Bolacha";
-//Console.WriteLine(produto.Nome);
-// produto.setNome("Bolacha");
-// Console.WriteLine(produto.getNome());
-
 List<Produto> produtos =
 [
     new Produto("Celular", "IOS", 345),
@@ -41,14 +34,15 @@ app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) =>
 });
 
 
-// GET: http://localhost:5169/produtos/buscar/nomedoproduto
-app.MapGet("/produtos/buscar/{nome}",  async ([FromRoute] string nome, [FromServices] AppDataContext ctx) =>
+// GET: http://localhost:5169/produtos/buscar/iddoproduto
+app.MapGet("/produtos/buscar/{id}", ([FromRoute] string id, 
+[FromServices] AppDataContext ctx) =>
     {
-        var produto = await ctx.TabelaProdutos.FirstOrDefaultAsync(p => p.Nome == nome);
-        if( produto != null){
-            return Results.Ok(produto);
+        Produto? produto = ctx.TabelaProdutos.Find(id);
+        if(produto == null){
+            return Results.NotFound("Produto não encontrado");
         }
-        return Results.NotFound("Produto não encontrado");
+        return Results.Ok(produto);
     }
 );
 
@@ -65,31 +59,36 @@ app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto,
 
 });
 
-// DELETE http://localhost:5169/produtos/deletar/Batata
-app.MapDelete("/produtos/deletar/{nome}", async ([FromRoute] string nome, [FromServices] AppDataContext ctx) =>
-{   
-    var produto = await ctx.TabelaProdutos.FirstOrDefaultAsync(p => p.Nome == nome);
-        if( produto != null){
-            ctx.TabelaProdutos.Remove(produto);
-            ctx.SaveChanges();
-            return Results.Ok("Produto removido com suscesso!!");
-        }
-    return Results.NotFound("Produto não encontrado");
+// DELETE http://localhost:5169/produtos/deletar/id
+app.MapDelete("/produtos/deletar/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
+{
+    Produto? produto = ctx.TabelaProdutos.FirstOrDefault(x => x.Id == id);
+    
+    if (produto is null)
+    {
+        
+        return Results.NotFound("Produto não encontrado");
+    }
+    ctx.TabelaProdutos.Remove(produto);
+    ctx.SaveChanges();
+    return Results.Ok("Produto removido com sucesso!!");
 });
 
-// PATCH http://localhost:5169/produtos/alterar/Batata/3.5
-app.MapPatch("/produtos/alterar/{nome}", async ([FromRoute] string nome, [FromBody] Produto novoProduto, [FromServices] AppDataContext ctx) =>
+// PATCH http://localhost:5169/produtos/alterar/id
+app.MapPatch("/produtos/alterar/{id}", ([FromRoute] string id, [FromBody] Produto novoProduto, 
+[FromServices] AppDataContext ctx) =>
 {
-    var produto = await ctx.TabelaProdutos.FirstOrDefaultAsync(p => p.Nome == nome);
-        if( produto != null){
-            produto.Nome = novoProduto.Nome;
-            produto.Descricao = novoProduto.Descricao;
-            produto.Valor = novoProduto.Valor;
-
-            ctx.SaveChanges();
-            return Results.Ok("Produto atualizado com suscesso!!");
+    var produto = ctx.TabelaProdutos.Find(id);
+        if( produto is null){
+            return Results.NotFound("Produto não encontrado");
+            
         }
-    return Results.NotFound("Produto não encontrado");
+    produto.Nome = novoProduto.Nome;
+    produto.Descricao = novoProduto.Descricao;
+    produto.Valor = novoProduto.Valor;
+
+    ctx.SaveChanges();
+    return Results.Ok("Produto atualizado com suscesso!!");
 });
 
 app.Run();
