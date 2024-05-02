@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using API.Models;
 using API.PrimeriaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -11,44 +12,32 @@ builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 
 
-//Produto produto = new Produto();
-//produto.Nome = "Bolacha";
-//Console.WriteLine(produto.Nome);
-// produto.setNome("Bolacha");
-// Console.WriteLine(produto.getNome());
-
-List<Produto> produtos =
-[
-    new Produto("Celular", "IOS", 345),
-    new Produto("Celular", "Android", 256.8),
-    new Produto("Televisão", "LG", 240),
-    new Produto("Placa de vídeo", "NVIDIA", 1200)
-];
-
-
 //Funcionalidades da aplicação - EndPoints
 // GET: http://localhost:5169/
 app.MapGet("/", () => "API de produtos");
 
 
 // GET: http://localhost:5169/produtos/listar
-app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) => 
+app.MapGet("/produtos/listar", ([FromServices] AppDataContext ctx) =>
 {
-    if(ctx.TabelaProdutos.Any()){
+    if (ctx.TabelaProdutos.Any())
+    {
         return Results.Ok(ctx.TabelaProdutos.ToList());
     }
     return Results.NotFound("Não existe produtos na tabela");
 });
 
 
-// GET: http://localhost:5169/produtos/buscar/nomedoproduto
-app.MapGet("/produtos/buscar/{nome}",  async ([FromRoute] string nome, [FromServices] AppDataContext ctx) =>
+// GET: http://localhost:5169/produtos/buscar/iddoproduto
+app.MapGet("/produtos/buscar/{id}", ([FromRoute] string id,
+[FromServices] AppDataContext ctx) =>
     {
-        var produto = await ctx.TabelaProdutos.FirstOrDefaultAsync(p => p.Nome == nome);
-        if( produto != null){
-            return Results.Ok(produto);
+        Produto? produto = ctx.TabelaProdutos.Find(id);
+        if (produto == null)
+        {
+            return Results.NotFound("Produto não encontrado");
         }
-        return Results.NotFound("Produto não encontrado");
+        return Results.Ok(produto);
     }
 );
 
@@ -57,39 +46,60 @@ app.MapGet("/produtos/buscar/{nome}",  async ([FromRoute] string nome, [FromServ
 // GET: http://localhost:5169/produtos/cadastrar
 app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto,
 [FromServices] AppDataContext ctx) =>
+
 {
-    //Adicionar o objeto dentro da tabela no bando de dados
-    ctx.TabelaProdutos.Add(produto);
-    ctx.SaveChanges(); //Aletrar ou remover, precisa do SaveChanges()
-    return Results.Created("", produto);
+
+    List<ValidationResult> erros = new List<ValidationResult>();
+    if (!Validator.TryValidateObject(produto, new ValidationContext(produto), erros, true))
+    {
+        return Results.BadRequest(erros);
+    }
+
+
+    Produto? produtoBuscado = ctx.TabelaProdutos.FirstOrDefault(x => x.Nome == produto.Nome);
+    if (produtoBuscado is null)
+    {
+        //Adicionar o objeto dentro da tabela no bando de dados
+        ctx.TabelaProdutos.Add(produto);
+        ctx.SaveChanges(); //Aletrar ou remover, precisa do SaveChanges()
+        return Results.Created("", produto);
+    }
+    return Results.BadRequest("Já existe um produto com o mesmo nome");
+
 
 });
 
-// DELETE http://localhost:5169/produtos/deletar/Batata
-app.MapDelete("/produtos/deletar/{nome}", async ([FromRoute] string nome, [FromServices] AppDataContext ctx) =>
-{   
-    var produto = await ctx.TabelaProdutos.FirstOrDefaultAsync(p => p.Nome == nome);
-        if( produto != null){
-            ctx.TabelaProdutos.Remove(produto);
-            ctx.SaveChanges();
-            return Results.Ok("Produto removido com suscesso!!");
-        }
-    return Results.NotFound("Produto não encontrado");
+// DELETE http://localhost:5169/produtos/deletar/id
+app.MapDelete("/produtos/deletar/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
+{
+    Produto? produto = ctx.TabelaProdutos.FirstOrDefault(x => x.Id == id);
+
+    if (produto is null)
+    {
+
+        return Results.NotFound("Produto não encontrado");
+    }
+    ctx.TabelaProdutos.Remove(produto);
+    ctx.SaveChanges();
+    return Results.Ok("Produto removido com sucesso!!");
 });
 
-// PATCH http://localhost:5169/produtos/alterar/Batata/3.5
-app.MapPatch("/produtos/alterar/{nome}", async ([FromRoute] string nome, [FromBody] Produto novoProduto, [FromServices] AppDataContext ctx) =>
+// PATCH http://localhost:5169/produtos/alterar/id
+app.MapPatch("/produtos/alterar/{id}", ([FromRoute] string id, [FromBody] Produto novoProduto,
+[FromServices] AppDataContext ctx) =>
 {
-    var produto = await ctx.TabelaProdutos.FirstOrDefaultAsync(p => p.Nome == nome);
-        if( produto != null){
-            produto.Nome = novoProduto.Nome;
-            produto.Descricao = novoProduto.Descricao;
-            produto.Valor = novoProduto.Valor;
+    var produto = ctx.TabelaProdutos.Find(id);
+    if (produto is null)
+    {
+        return Results.NotFound("Produto não encontrado");
 
-            ctx.SaveChanges();
-            return Results.Ok("Produto atualizado com suscesso!!");
-        }
-    return Results.NotFound("Produto não encontrado");
+    }
+    produto.Nome = novoProduto.Nome;
+    produto.Descricao = novoProduto.Descricao;
+    produto.Valor = novoProduto.Valor;
+
+    ctx.SaveChanges();
+    return Results.Ok("Produto atualizado com suscesso!!");
 });
 
 app.Run();
