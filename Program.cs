@@ -46,9 +46,7 @@ app.MapGet("/produtos/buscar/{id}", ([FromRoute] string id,
 // GET: http://localhost:5169/produtos/cadastrar
 app.MapPost("/produtos/cadastrar/", ([FromBody] Produto produto,
 [FromServices] AppDataContext ctx) =>
-
 {
-
     List<ValidationResult> erros = new List<ValidationResult>();
     if (!Validator.TryValidateObject(produto, new ValidationContext(produto), erros, true))
     {
