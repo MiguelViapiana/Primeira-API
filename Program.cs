@@ -9,6 +9,12 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 //Registrar o sereviço de banco de dados
 builder.Services.AddDbContext<AppDataContext>();
+
+//Configurar a politica de CORS para liberar o acesso total
+builder.Services.AddCors(
+    options => options.AddPolicy("Acesso Total", configs => configs.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod())
+);
+
 var app = builder.Build();
 
 
@@ -101,6 +107,6 @@ app.MapPatch("/produtos/alterar/{id}", ([FromRoute] string id, [FromBody] Produt
     ctx.SaveChanges();
     return Results.Ok("Produto atualizado com suscesso!!");
 });
-
+app.UseCors("Acesso Total");
 app.Run();
 
