@@ -36,7 +36,7 @@ PATCH http://localhost:5169/produtos/alterar/0a32ea2b-e269-42c2-bb93-9aa2e4c2f72
 Content-Type: application/json
 
 {
-    "nome": "Macarrão",
+    "nome": "Feijão",
     "descricao": "Alimento",
     "preco": 7.50
 }
