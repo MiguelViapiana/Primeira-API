@@ -12,7 +12,7 @@ POST http://localhost:5169/produtos/cadastrar
 Content-Type: application/json
 
 {
-    "nome" : "Batata",
+    "nome" : "Batata 3",
     "descricao": "Alimento",
     "valor": 2.60
 }
