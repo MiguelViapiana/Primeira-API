@@ -87,7 +87,7 @@ app.MapDelete("/produtos/deletar/{id}", ([FromRoute] string id, [FromServices] A
     }
     ctx.TabelaProdutos.Remove(produto);
     ctx.SaveChanges();
-    return Results.Ok("Produto removido com sucesso!!");
+    return Results.Ok("");
 });
 
 // PATCH http://localhost:5169/produtos/alterar/id
